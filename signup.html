@@ -1,0 +1,748 @@
+{% extends "base.html" %}
+{% block title %}Signup - CHD App{% endblock %}
+{% block content %}
+<div class="auth-container">
+  <div class="auth-card card">
+    <div class="auth-header">
+      <div class="auth-icon">👤</div>
+      <h2>Create Account</h2>
+      <p>Join our platform to track your cardiovascular health</p>
+    </div>
+
+    <form id="signup-form" class="auth-form">
+      <div class="form-group">
+        <label for="signup-name">Full Name</label>
+        <div class="input-wrapper">
+          <span class="input-icon">👤</span>
+          <input type="text" name="name" id="signup-name" placeholder="Enter your full name">
+        </div>
+        <small class="field-hint">Optional - helps personalize your experience</small>
+      </div>
+
+      <div class="form-group">
+        <label for="signup-email">Email Address</label>
+        <div class="input-wrapper">
+          <span class="input-icon">✉️</span>
+          <input type="email" name="email" id="signup-email" required placeholder="Enter your email">
+        </div>
+        <small class="field-hint">We'll use this for login and important updates</small>
+      </div>
+
+      <div class="form-group">
+        <label for="signup-password">Password</label>
+        <div class="input-wrapper">
+          <span class="input-icon">🔒</span>
+          <input type="password" name="password" id="signup-password" minlength="8" required placeholder="Create a strong password">
+          <button type="button" class="password-toggle" onclick="togglePassword('signup-password')">
+            <span class="toggle-icon">👁️</span>
+          </button>
+        </div>
+        <small class="field-hint">Minimum 8 characters required</small>
+        <div class="password-strength">
+          <div class="strength-bar">
+            <div class="strength-fill"></div>
+          </div>
+          <span class="strength-text">Password strength</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="checkbox-label">
+          <input type="checkbox" id="terms-checkbox" required>
+          <span class="checkmark"></span>
+          I agree to the <a href="#" target="_blank">Terms of Service</a> and <a href="#" target="_blank">Privacy Policy</a>
+        </label>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn-primary">
+          <span class="btn-icon">🚀</span>
+          Create Account
+        </button>
+      </div>
+    </form>
+
+    <div id="signup-message" class="message"></div>
+
+    <div class="auth-footer">
+      <p>Already have an account? <a href="{{ url_for('login_page') }}">Sign in here</a></p>
+    </div>
+  </div>
+
+  <div class="auth-features">
+    <div class="signup-benefits">
+      <h3>🎯 Why Join Us?</h3>
+      <div class="benefit-list">
+        <div class="benefit-item">
+          <span class="benefit-icon">📊</span>
+          <div>
+            <strong>Track Progress</strong>
+            <p>Monitor your CHD risk assessments over time and see trends</p>
+          </div>
+        </div>
+        <div class="benefit-item">
+          <span class="benefit-icon">🤖</span>
+          <div>
+            <strong>AI-Powered Insights</strong>
+            <p>Get personalized recommendations based on your health data</p>
+          </div>
+        </div>
+        <div class="benefit-item">
+          <span class="benefit-icon">📱</span>
+          <div>
+            <strong>Multi-Device Access</strong>
+            <p>Access your health records from anywhere, anytime</p>
+          </div>
+        </div>
+        <div class="benefit-item">
+          <span class="benefit-icon">🔒</span>
+          <div>
+            <strong>Secure & Private</strong>
+            <p>Your medical data is encrypted and never shared</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="security-info">
+      <div class="security-badge">
+        <span class="security-icon">🛡️</span>
+        <div>
+          <strong>HIPAA Compliant</strong>
+          <p>Your health information is protected according to healthcare privacy standards</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.auth-container {
+  display: flex;
+  min-height: calc(100vh - 200px);
+  gap: 3rem;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 2rem 0;
+}
+
+.auth-card {
+  flex: 0 0 420px;
+  max-width: 420px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(169, 62, 83, 0.1);
+  box-shadow: 0 20px 60px rgba(107, 5, 47, 0.1);
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.auth-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.auth-header h2 {
+  color: #6B052F;
+  margin-bottom: 0.5rem;
+  font-size: 1.8rem;
+}
+
+.auth-header p {
+  color: #A93E53;
+  margin: 0;
+  font-size: 1rem;
+}
+
+.auth-form {
+  background: transparent;
+  padding: 0;
+  box-shadow: none;
+  border: none;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #6B052F;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon {
+  position: absolute;
+  left: 12px;
+  font-size: 1.1rem;
+  z-index: 2;
+}
+
+.input-wrapper input {
+  padding-left: 3rem;
+  padding-right: 3rem;
+  width: 100%;
+  height: 48px;
+  border: 2px solid rgba(169, 62, 83, 0.1);
+  border-radius: 8px;
+  font-size: 1rem;
+  background: #fff;
+  transition: all 0.3s ease;
+}
+
+.input-wrapper input:focus {
+  border-color: rgba(169, 62, 83, 0.6);
+  box-shadow: 0 0 0 3px rgba(255, 220, 209, 0.3);
+  outline: none;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background 0.3s ease;
+  z-index: 2;
+}
+
+.password-toggle:hover {
+  background: rgba(169, 62, 83, 0.1);
+}
+
+.toggle-icon {
+  font-size: 1.1rem;
+}
+
+.field-hint {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.85rem;
+  color: #999;
+}
+
+.password-strength {
+  margin-top: 0.5rem;
+}
+
+.strength-bar {
+  height: 4px;
+  background: rgba(169, 62, 83, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 0.25rem;
+}
+
+.strength-fill {
+  height: 100%;
+  width: 0%;
+  transition: all 0.3s ease;
+  border-radius: 2px;
+}
+
+.strength-text {
+  font-size: 0.8rem;
+  color: #999;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  cursor: pointer;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  color: #666;
+}
+
+.checkbox-label input[type="checkbox"] {
+  display: none;
+}
+
+.checkmark {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(169, 62, 83, 0.3);
+  border-radius: 4px;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.checkbox-label input[type="checkbox"]:checked + .checkmark {
+  background: linear-gradient(135deg, #A93E53, #6B052F);
+  border-color: #6B052F;
+}
+
+.checkbox-label input[type="checkbox"]:checked + .checkmark::after {
+  content: '✓';
+  color: white;
+  font-weight: bold;
+  font-size: 12px;
+}
+
+.checkbox-label a {
+  color: #A93E53;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.checkbox-label a:hover {
+  text-decoration: underline;
+}
+
+.form-actions {
+  margin: 2rem 0;
+}
+
+.btn-primary {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #A93E53, #6B052F);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  height: 48px;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(169, 62, 83, 0.3);
+}
+
+.btn-primary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-icon {
+  font-size: 1.1rem;
+}
+
+.message {
+  margin: 1rem 0;
+  padding: 1rem;
+  border-radius: 8px;
+  font-weight: 500;
+  text-align: center;
+  display: none;
+}
+
+.message:not(:empty) {
+  display: block;
+}
+
+.message.success {
+  background: #eaf7ef;
+  color: #185033;
+  border: 1px solid #48bb78;
+}
+
+.message.error {
+  background: #fff0f0;
+  color: #7a1b1b;
+  border: 1px solid #e53e3e;
+}
+
+.auth-footer {
+  text-align: center;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(169, 62, 83, 0.1);
+}
+
+.auth-footer p {
+  margin: 0;
+  color: #666;
+}
+
+.auth-footer a {
+  color: #A93E53;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.auth-footer a:hover {
+  color: #6B052F;
+  text-decoration: underline;
+}
+
+.auth-features {
+  flex: 1;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.signup-benefits h3 {
+  color: #6B052F;
+  margin-bottom: 1.5rem;
+  font-size: 1.4rem;
+}
+
+.benefit-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.benefit-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 12px;
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(169, 62, 83, 0.05);
+  transition: transform 0.3s ease;
+}
+
+.benefit-item:hover {
+  transform: translateX(5px);
+}
+
+.benefit-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.benefit-item strong {
+  color: #6B052F;
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 1.05rem;
+}
+
+.benefit-item p {
+  color: #666;
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.security-info {
+  margin-top: 1rem;
+}
+
+.security-badge {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 12px;
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(169, 62, 83, 0.1);
+}
+
+.security-icon {
+  font-size: 2.5rem;
+  flex-shrink: 0;
+}
+
+.security-badge strong {
+  color: #6B052F;
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 1.05rem;
+}
+
+.security-badge p {
+  color: #666;
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.loading {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Password strength colors */
+.strength-weak { background: #e53e3e; }
+.strength-fair { background: #ed8936; }
+.strength-good { background: #ffc107; }
+.strength-strong { background: #28a745; }
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .auth-container {
+    flex-direction: column;
+    gap: 2rem;
+    align-items: center;
+  }
+  
+  .auth-features {
+    max-width: 600px;
+  }
+}
+
+@media (max-width: 768px) {
+  .auth-container {
+    padding: 1rem;
+  }
+  
+  .auth-card {
+    flex: none;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+  }
+  
+  .auth-features {
+    width: 100%;
+  }
+  
+  .benefit-item {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .benefit-item:hover {
+    transform: translateY(-5px);
+  }
+  
+  .security-badge {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+</style>
+
+<script>
+// Enhanced signup form functionality
+function togglePassword(inputId) {
+  const input = document.getElementById(inputId);
+  const toggle = input.nextElementSibling.querySelector('.toggle-icon');
+  
+  if (input.type === 'password') {
+    input.type = 'text';
+    toggle.textContent = '🙈';
+  } else {
+    input.type = 'password';
+    toggle.textContent = '👁️';
+  }
+}
+
+function showMessage(text, type = 'info') {
+  const messageEl = document.getElementById('signup-message');
+  messageEl.textContent = text;
+  messageEl.className = `message ${type}`;
+}
+
+function hideMessage() {
+  const messageEl = document.getElementById('signup-message');
+  messageEl.textContent = '';
+  messageEl.className = 'message';
+}
+
+function checkPasswordStrength(password) {
+  const strengthFill = document.querySelector('.strength-fill');
+  const strengthText = document.querySelector('.strength-text');
+  
+  let strength = 0;
+  let strengthClass = '';
+  let strengthLabel = '';
+  
+  if (password.length >= 8) strength++;
+  if (/[a-z]/.test(password)) strength++;
+  if (/[A-Z]/.test(password)) strength++;
+  if (/[0-9]/.test(password)) strength++;
+  if (/[^a-zA-Z0-9]/.test(password)) strength++;
+  
+  const percentage = (strength / 5) * 100;
+  strengthFill.style.width = percentage + '%';
+  
+  switch(strength) {
+    case 0:
+    case 1:
+      strengthClass = 'strength-weak';
+      strengthLabel = 'Very weak';
+      break;
+    case 2:
+      strengthClass = 'strength-fair';
+      strengthLabel = 'Fair';
+      break;
+    case 3:
+      strengthClass = 'strength-good';
+      strengthLabel = 'Good';
+      break;
+    case 4:
+    case 5:
+      strengthClass = 'strength-strong';
+      strengthLabel = 'Strong';
+      break;
+  }
+  
+  strengthFill.className = `strength-fill ${strengthClass}`;
+  strengthText.textContent = password.length > 0 ? `Password strength: ${strengthLabel}` : 'Password strength';
+}
+
+function validateForm() {
+  const email = document.getElementById('signup-email').value.trim();
+  const password = document.getElementById('signup-password').value;
+  const termsChecked = document.getElementById('terms-checkbox').checked;
+  
+  let isValid = true;
+  let errors = [];
+  
+  if (!email || !email.includes('@')) {
+    errors.push('Please enter a valid email address');
+    isValid = false;
+  }
+  
+  if (password.length < 8) {
+    errors.push('Password must be at least 8 characters long');
+    isValid = false;
+  }
+  
+  if (!termsChecked) {
+    errors.push('Please accept the Terms of Service and Privacy Policy');
+    isValid = false;
+  }
+  
+  return { isValid, errors };
+}
+
+// Event listeners
+document.getElementById('signup-password').addEventListener('input', function() {
+  checkPasswordStrength(this.value);
+});
+
+document.getElementById('signup-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const form = e.target;
+  const submitBtn = form.querySelector('button[type="submit"]');
+  const originalContent = submitBtn.innerHTML;
+  
+  // Validate form
+  const validation = validateForm();
+  if (!validation.isValid) {
+    showMessage(validation.errors[0], 'error');
+    return;
+  }
+  
+  // Show loading state
+  submitBtn.innerHTML = '<span class="loading"></span> Creating account...';
+  submitBtn.disabled = true;
+  hideMessage();
+  
+  const payload = {
+    name: form.name.value.trim(),
+    email: form.email.value.trim(),
+    password: form.password.value
+  };
+  
+  try {
+    const res = await fetch('/signup', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload),
+      credentials: 'same-origin'
+    });
+    
+    const data = await res.json();
+    
+    if (res.ok) {
+      showMessage('Account created successfully! Redirecting to login...', 'success');
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 2000);
+    } else {
+      showMessage(data.error || 'Signup failed. Please try again.', 'error');
+    }
+  } catch (error) {
+    showMessage('Network error. Please try again.', 'error');
+  } finally {
+    // Restore button state
+    submitBtn.innerHTML = originalContent;
+    submitBtn.disabled = false;
+  }
+});
+
+// Add real-time form validation
+const inputs = document.querySelectorAll('input[required]');
+inputs.forEach(input => {
+  input.addEventListener('blur', function() {
+    validateField(this);
+  });
+  
+  input.addEventListener('input', function() {
+    if (this.style.borderColor === 'rgba(229, 62, 62, 0.6)') {
+      validateField(this);
+    }
+  });
+});
+
+function validateField(field) {
+  let isValid = true;
+  
+  if (field.type === 'email') {
+    isValid = field.value.trim() !== '' && field.validity.valid;
+  } else if (field.type === 'password') {
+    isValid = field.value.length >= 8;
+  } else {
+    isValid = field.value.trim() !== '';
+  }
+  
+  if (!isValid) {
+    field.style.borderColor = 'rgba(229, 62, 62, 0.6)';
+    field.style.boxShadow = '0 0 0 3px rgba(229, 62, 62, 0.1)';
+  } else {
+    field.style.borderColor = 'rgba(169, 62, 83, 0.1)';
+    field.style.boxShadow = 'none';
+  }
+}
+
+// Terms checkbox styling
+document.getElementById('terms-checkbox').addEventListener('change', function() {
+  const checkmark = this.nextElementSibling;
+  if (this.checked) {
+    checkmark.style.borderColor = '#6B052F';
+  } else {
+    checkmark.style.borderColor = 'rgba(169, 62, 83, 0.3)';
+  }
+});
+</script>
+{% endblock %}

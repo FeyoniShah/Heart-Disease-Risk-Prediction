@@ -1,0 +1,841 @@
+{% extends "base.html" %}
+{% block title %}Predict CHD Risk{% endblock %}
+{% block content %}
+<div class="prediction-container">
+  <div class="page-header">
+    <h1>CHD Risk Assessment</h1>
+    <p>Upload medical reports or enter patient data manually for AI-powered risk analysis</p>
+  </div>
+
+  <!-- OCR Upload Section -->
+  <div class="card ocr-section">
+    <div class="section-header">
+      <h3>📄 Medical Document Upload</h3>
+      <p>Upload medical images to automatically extract patient data</p>
+    </div>
+    
+    <div class="upload-area">
+      <div class="file-input-wrapper">
+        <input id="ocr-image" type="file" accept="image/*" class="file-input" />
+        <label for="ocr-image" class="file-input-label">
+          <span class="upload-icon">📁</span>
+          <span class="upload-text">Choose medical image file</span>
+          <span class="upload-hint">PNG, JPG, JPEG supported</span>
+        </label>
+      </div>
+      
+      <div class="ocr-buttons">
+        <button id="run-ocr-btn" class="btn-ocr">
+          <span class="btn-icon">🔍</span>
+          Extract & Preview Data
+        </button>
+        <button id="ocr-predict-btn" class="btn-ocr-predict">
+          <span class="btn-icon">⚡</span>
+          Extract & Get Prediction
+        </button>
+      </div>
+    </div>
+    
+    <div id="ocr-status" class="status-message"></div>
+  </div>
+
+  <!-- Manual Data Entry Form -->
+  <div class="card form-section">
+    <div class="section-header">
+      <h3>📋 Patient Information</h3>
+      <p>Enter or review patient data for CHD risk assessment</p>
+    </div>
+
+    <form id="predict-form" class="prediction-form">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="male">Gender</label>
+          <select name="male" id="male" required>
+            <option value="">Select gender</option>
+            <option value="0">Female</option>
+            <option value="1">Male</option>
+          </select>
+          <small class="field-hint">Patient's biological sex</small>
+        </div>
+
+        <div class="form-group">
+          <label for="age">Age (years)</label>
+          <input name="age" id="age" type="number" min="18" max="120" required>
+          <small class="field-hint">Patient's age in years</small>
+        </div>
+
+        <div class="form-group">
+          <label for="education">Education Level</label>
+          <select name="education" id="education" required>
+            <option value="">Select level</option>
+            <option value="1">High School or less</option>
+            <option value="2">Some College</option>
+            <option value="3">College Graduate</option>
+            <option value="4">Post Graduate</option>
+          </select>
+          <small class="field-hint">Highest education completed</small>
+        </div>
+
+        <div class="form-group">
+          <label for="cigsPerDay">Cigarettes per Day</label>
+          <input name="cigsPerDay" id="cigsPerDay" type="number" min="0" max="100" required>
+          <small class="field-hint">Average daily cigarette consumption</small>
+        </div>
+
+        <div class="form-group">
+          <label for="totChol">Total Cholesterol (mg/dL)</label>
+          <input name="totChol" id="totChol" type="number" min="100" max="500" required>
+          <small class="field-hint">Total cholesterol level</small>
+        </div>
+
+        <div class="form-group">
+          <label for="sysBP">Systolic BP (mmHg)</label>
+          <input name="sysBP" id="sysBP" type="number" min="80" max="250" required>
+          <small class="field-hint">Systolic blood pressure</small>
+        </div>
+
+        <div class="form-group">
+          <label for="diaBP">Diastolic BP (mmHg)</label>
+          <input name="diaBP" id="diaBP" type="number" min="40" max="150" required>
+          <small class="field-hint">Diastolic blood pressure</small>
+        </div>
+
+        <div class="form-group">
+          <label for="BMI">BMI (kg/m²)</label>
+          <input name="BMI" id="BMI" step="0.1" type="number" min="15" max="50" required>
+          <small class="field-hint">Body Mass Index</small>
+        </div>
+
+        <div class="form-group">
+          <label for="heartRate">Heart Rate (bpm)</label>
+          <input name="heartRate" id="heartRate" type="number" min="40" max="200" required>
+          <small class="field-hint">Resting heart rate</small>
+        </div>
+
+        <div class="form-group">
+          <label for="glucose">Glucose (mg/dL)</label>
+          <input name="glucose" id="glucose" type="number" min="50" max="500" required>
+          <small class="field-hint">Blood glucose level</small>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn-predict">
+          <span class="btn-icon">🔬</span>
+          Generate Risk Assessment
+        </button>
+        <button type="reset" class="btn-reset">
+          <span class="btn-icon">🔄</span>
+          Clear Form
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Prediction Results -->
+  <div id="prediction-result" class="prediction-result"></div>
+
+  <!-- OCR Output Display -->
+  <div id="ocr-output" class="ocr-output"></div>
+</div>
+
+<style>
+.prediction-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.page-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.page-header h1 {
+  color: #6B052F;
+  margin-bottom: 0.5rem;
+}
+
+.page-header p {
+  color: #A93E53;
+  font-size: 1.1rem;
+  margin-bottom: 0;
+}
+
+.section-header {
+  margin-bottom: 1.5rem;
+}
+
+.section-header h3 {
+  color: #6B052F;
+  margin-bottom: 0.5rem;
+  font-size: 1.4rem;
+}
+
+.section-header p {
+  color: #666;
+  margin-bottom: 0;
+}
+
+.upload-area {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+}
+
+.file-input-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+}
+
+.file-input {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+.file-input-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+  border: 2px dashed rgba(169, 62, 83, 0.3);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.file-input-label:hover {
+  border-color: rgba(169, 62, 83, 0.6);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.upload-icon {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+}
+
+.upload-text {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #6B052F;
+  margin-bottom: 0.25rem;
+}
+
+.upload-hint {
+  font-size: 0.9rem;
+  color: #999;
+}
+
+.ocr-buttons {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.btn-ocr, .btn-ocr-predict {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-ocr {
+  background: rgba(169, 62, 83, 0.1);
+  color: #6B052F;
+  border: 1px solid rgba(169, 62, 83, 0.2);
+}
+
+.btn-ocr:hover {
+  background: rgba(169, 62, 83, 0.2);
+  transform: translateY(-1px);
+}
+
+.btn-ocr-predict {
+  background: linear-gradient(135deg, #A93E53, #6B052F);
+  color: white;
+}
+
+.btn-ocr-predict:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(169, 62, 83, 0.3);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-weight: 600;
+  color: #6B052F;
+  margin-bottom: 0.5rem;
+}
+
+.form-group select {
+  background-color: #fff;
+  border: 2px solid rgba(169, 62, 83, 0.1);
+  border-radius: 8px;
+  padding: 0.75rem;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.form-group select:focus,
+.form-group input:focus {
+  border-color: rgba(169, 62, 83, 0.6);
+  box-shadow: 0 0 0 3px rgba(255, 220, 209, 0.3);
+}
+
+.field-hint {
+  color: #999;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 2rem;
+}
+
+.btn-predict, .btn-reset {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 2rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-predict {
+  background: linear-gradient(135deg, #A93E53, #6B052F);
+  color: white;
+}
+
+.btn-predict:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(169, 62, 83, 0.3);
+}
+
+.btn-reset {
+  background: transparent;
+  color: #A93E53;
+  border: 2px solid rgba(169, 62, 83, 0.3);
+}
+
+.btn-reset:hover {
+  background: rgba(169, 62, 83, 0.1);
+  transform: translateY(-1px);
+}
+
+.btn-icon {
+  font-size: 1.1rem;
+}
+
+.prediction-result {
+  margin-top: 2rem;
+}
+
+.prediction-result:empty {
+  display: none;
+}
+
+.ocr-output {
+  margin-top: 2rem;
+}
+
+.ocr-output:empty {
+  display: none;
+}
+
+/* Status message enhancements */
+.status-message {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 8px;
+  font-weight: 500;
+  display: none;
+}
+
+.status-message:not(:empty) {
+  display: block;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .ocr-buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .btn-ocr, .btn-ocr-predict {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+  }
+  
+  .btn-predict, .btn-reset {
+    width: 100%;
+    justify-content: center;
+  }
+}
+</style>
+
+<script>
+/*
+  Enhanced JavaScript for better UX
+*/
+
+const ocrImageInput = document.getElementById('ocr-image');
+const ocrStatus = document.getElementById('ocr-status');
+const ocrOutput = document.getElementById('ocr-output');
+const predictionResult = document.getElementById('prediction-result');
+
+// Update file input label when file is selected
+ocrImageInput.addEventListener('change', function() {
+  const label = document.querySelector('.file-input-label');
+  const uploadText = label.querySelector('.upload-text');
+  const uploadHint = label.querySelector('.upload-hint');
+  
+  if (this.files && this.files[0]) {
+    uploadText.textContent = this.files[0].name;
+    uploadHint.textContent = 'File selected - ready to process';
+    label.style.borderColor = 'rgba(169, 62, 83, 0.6)';
+    label.style.background = 'rgba(255, 255, 255, 0.9)';
+  } else {
+    uploadText.textContent = 'Choose medical image file';
+    uploadHint.textContent = 'PNG, JPG, JPEG supported';
+    label.style.borderColor = 'rgba(169, 62, 83, 0.3)';
+    label.style.background = 'rgba(255, 255, 255, 0.7)';
+  }
+});
+
+// Enhanced status display
+function showStatus(message, type = 'info') {
+  ocrStatus.textContent = message;
+  ocrStatus.className = `status-message status-${type}`;
+  ocrStatus.style.display = 'block';
+}
+
+function hideStatus() {
+  ocrStatus.style.display = 'none';
+}
+
+// helper to send image to /ocr_predict
+async function uploadImageAndGetOCR() {
+  if (!ocrImageInput.files || !ocrImageInput.files.length) {
+    throw new Error('Please choose an image file first.');
+  }
+  const file = ocrImageInput.files[0];
+  const fd = new FormData();
+  fd.append('image', file);
+
+  const res = await fetch('/ocr_predict', {
+    method: 'POST',
+    body: fd,
+    credentials: 'same-origin'
+  });
+
+  const json = await res.json();
+  return { ok: res.ok, status: res.status, json };
+}
+
+// Prefill form fields using chd_format_data from OCR response
+function prefillFormFromOCR(chd) {
+  const fields = ['male','age','education','cigsPerDay','totChol','sysBP','diaBP','BMI','heartRate','glucose'];
+  fields.forEach(f => {
+    if (chd.hasOwnProperty(f) && chd[f] !== null && chd[f] !== undefined && chd[f] !== '') {
+      const el = document.getElementById(f);
+      if (!el) return;
+      el.value = chd[f];
+    }
+  });
+}
+
+// Enhanced OCR result display
+function showOCRResult(ocr) {
+  let html = '<div class="card ocr-results">';
+  html += '<div class="section-header"><h3>📄 OCR Results</h3></div>';
+  
+  if (ocr.raw_text) {
+    html += '<div class="ocr-section-item">';
+    html += '<h4>Extracted Text</h4>';
+    html += `<div class="ocr-text">${escapeHtml(ocr.raw_text)}</div>`;
+    html += '</div>';
+  }
+  
+  if (ocr.parsed_data) {
+    html += '<div class="ocr-section-item">';
+    html += '<h4>Parsed Fields</h4>';
+    html += `<pre class="ocr-data">${escapeHtml(JSON.stringify(ocr.parsed_data, null, 2))}</pre>`;
+    html += '</div>';
+  }
+  
+  if (ocr.chd_format_data) {
+    html += '<div class="ocr-section-item">';
+    html += '<h4>Mapped CHD Fields</h4>';
+    html += `<pre class="ocr-data">${escapeHtml(JSON.stringify(ocr.chd_format_data, null, 2))}</pre>`;
+    html += '</div>';
+  }
+  
+  html += '</div>';
+  ocrOutput.innerHTML = html;
+}
+
+// Enhanced prediction result display
+function showPredictionResponse(data) {
+  if (!data || !data.prediction) {
+    predictionResult.innerHTML = `<div class="card error-result">
+      <h3>❌ Prediction Error</h3>
+      <p>Unable to generate prediction. Please check your input data.</p>
+    </div>`;
+    return;
+  }
+  
+  const p = data.prediction;
+  const riskClass = p.risk_category ? p.risk_category.toLowerCase().replace(' ', '-') : 'unknown';
+  
+  let riskIcon = '📊';
+  if (riskClass.includes('low')) riskIcon = '✅';
+  else if (riskClass.includes('moderate')) riskIcon = '⚠️';
+  else if (riskClass.includes('high')) riskIcon = '🚨';
+  
+  predictionResult.innerHTML = `
+    <div class="card prediction-card risk-${riskClass}">
+      <div class="prediction-header">
+        <span class="risk-icon">${riskIcon}</span>
+        <h3>CHD Risk Assessment Result</h3>
+      </div>
+      
+      <div class="prediction-content">
+        <div class="risk-summary">
+          <div class="risk-category">
+            <span class="label">Risk Level:</span>
+            <span class="value risk-${riskClass}">${p.risk_category}</span>
+          </div>
+          <div class="risk-probability">
+            <span class="label">Risk Probability:</span>
+            <span class="value">${(p.chd_risk_probability*100).toFixed(2)}%</span>
+          </div>
+        </div>
+        
+        <div class="risk-description">
+          <h4>Assessment Details</h4>
+          <p>${p.risk_description}</p>
+        </div>
+        
+        <div class="recommendation">
+          <h4>Medical Recommendation</h4>
+          <p>${p.recommendation}</p>
+        </div>
+        
+        ${p.db_id ? `<div class="record-info">
+          <small>Record ID: ${p.db_id} | Saved to your history</small>
+        </div>` : ''}
+      </div>
+      
+      <div class="prediction-actions">
+        <a href="/dashboard" class="btn-secondary">View History</a>
+        <button onclick="window.print()" class="btn-secondary">Print Result</button>
+      </div>
+    </div>
+  `;
+}
+
+// Utility: escape HTML
+function escapeHtml(s){
+  if(!s) return '';
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+// Button handlers with enhanced UX
+document.getElementById('run-ocr-btn').addEventListener('click', async (e) => {
+  e.preventDefault();
+  showStatus('Processing image and extracting data...', 'processing');
+  ocrOutput.innerHTML = '';
+  predictionResult.innerHTML = '';
+  
+  try {
+    const { ok, json } = await uploadImageAndGetOCR();
+    if (!ok) {
+      showStatus(`OCR failed: ${json.error || 'Unknown error'}`, 'error');
+      if (json.ocr) {
+        showOCRResult(json.ocr);
+      } else if (json.parsed_data || json.raw_text) {
+        showOCRResult({ raw_text: json.raw_text, parsed_data: json.parsed_data, chd_format_data: json.chd_format_data });
+      }
+      return;
+    }
+
+    showStatus('OCR completed successfully! Form prefilled with detected values.', 'success');
+    
+    if (json.ocr) {
+      showOCRResult(json.ocr);
+      if (json.ocr.chd_format_data) {
+        prefillFormFromOCR(json.ocr.chd_format_data);
+      }
+    } else if (json.parsed_data || json.chd_format_data || json.raw_text) {
+      showOCRResult({ raw_text: json.raw_text, parsed_data: json.parsed_data, chd_format_data: json.chd_format_data });
+      if (json.chd_format_data) prefillFormFromOCR(json.chd_format_data);
+    } else if (json.chd_format_data) {
+      prefillFormFromOCR(json.chd_format_data);
+      showOCRResult({ chd_format_data: json.chd_format_data });
+    } else {
+      showStatus('OCR completed but no structured fields were detected.', 'warning');
+    }
+
+    if (json.prediction) {
+      showPredictionResponse(json);
+    }
+
+  } catch(err) {
+    showStatus('OCR request failed: ' + err.message, 'error');
+  }
+});
+
+document.getElementById('ocr-predict-btn').addEventListener('click', async (e) => {
+  e.preventDefault();
+  showStatus('Processing image and generating prediction...', 'processing');
+  ocrOutput.innerHTML = '';
+  predictionResult.innerHTML = '';
+  
+  try {
+    const { ok, json } = await uploadImageAndGetOCR();
+    if (!ok) {
+      showStatus(`Error: ${json.error || 'Processing failed'}`, 'error');
+      if (json.ocr) showOCRResult(json.ocr);
+      return;
+    }
+    
+    showStatus('OCR and prediction completed successfully!', 'success');
+    
+    if (json.ocr) {
+      showOCRResult(json.ocr);
+      if (json.ocr.chd_format_data) prefillFormFromOCR(json.ocr.chd_format_data);
+    } else {
+      showOCRResult({ raw_text: json.raw_text, parsed_data: json.parsed_data, chd_format_data: json.chd_format_data });
+      if (json.chd_format_data) prefillFormFromOCR(json.chd_format_data);
+    }
+
+    if (json.prediction) {
+      showPredictionResponse(json);
+    } else {
+      showStatus('Data extracted but prediction unavailable. Please review and submit manually.', 'warning');
+    }
+
+  } catch(err) {
+    showStatus('Request failed: ' + err.message, 'error');
+  }
+});
+
+// Enhanced form submission
+document.getElementById('predict-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const f = e.target;
+  const payload = {
+    male: Number(f.male.value),
+    age: Number(f.age.value),
+    education: Number(f.education.value),
+    cigsPerDay: Number(f.cigsPerDay.value),
+    totChol: Number(f.totChol.value),
+    sysBP: Number(f.sysBP.value),
+    diaBP: Number(f.diaBP.value),
+    BMI: parseFloat(f.BMI.value),
+    heartRate: Number(f.heartRate.value),
+    glucose: Number(f.glucose.value)
+  };
+
+  // Show loading state
+  const submitBtn = f.querySelector('button[type="submit"]');
+  const originalText = submitBtn.innerHTML;
+  submitBtn.innerHTML = '<span class="loading"></span> Processing...';
+  submitBtn.disabled = true;
+
+  try {
+    const res = await fetch('/predict', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      credentials: 'same-origin',
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    
+    if (res.ok) {
+      showPredictionResponse(data);
+      hideStatus();
+    } else {
+      predictionResult.innerHTML = `<div class="card error-result">
+        <h3>❌ Prediction Error</h3>
+        <p>${data.error || 'Unknown error occurred'}</p>
+      </div>`;
+    }
+  } catch(err) {
+    predictionResult.innerHTML = `<div class="card error-result">
+      <h3>❌ Network Error</h3>
+      <p>Prediction request failed: ${err.message}</p>
+    </div>`;
+  } finally {
+    // Restore button state
+    submitBtn.innerHTML = originalText;
+    submitBtn.disabled = false;
+  }
+});
+</script>
+
+<!-- Additional styles for enhanced components -->
+<style>
+.ocr-results {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(169, 62, 83, 0.1);
+}
+
+.ocr-section-item {
+  margin-bottom: 1.5rem;
+}
+
+.ocr-section-item h4 {
+  color: #6B052F;
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+}
+
+.ocr-text {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 6px;
+  border-left: 4px solid rgba(169, 62, 83, 0.3);
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.ocr-data {
+  background: #fff;
+  border: 1px solid rgba(169, 62, 83, 0.1);
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.prediction-card {
+  background: #fff;
+  border: 1px solid rgba(169, 62, 83, 0.1);
+  position: relative;
+}
+
+.prediction-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid rgba(169, 62, 83, 0.1);
+}
+
+.risk-icon {
+  font-size: 2rem;
+}
+
+.prediction-content .risk-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: rgba(255, 220, 209, 0.1);
+  border-radius: 8px;
+}
+
+.risk-summary > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.risk-summary .label {
+  font-weight: 600;
+  color: #6B052F;
+  font-size: 0.9rem;
+}
+
+.risk-summary .value {
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.value.risk-low { color: #28a745; }
+.value.risk-moderate { color: #ffc107; }
+.value.risk-high { color: #dc3545; }
+
+.risk-description, .recommendation {
+  margin-bottom: 1.5rem;
+}
+
+.risk-description h4, .recommendation h4 {
+  color: #6B052F;
+  margin-bottom: 0.5rem;
+}
+
+.record-info {
+  text-align: center;
+  color: #999;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(169, 62, 83, 0.1);
+}
+
+.prediction-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(169, 62, 83, 0.1);
+}
+
+.error-result {
+  background: #fff5f5;
+  border-left: 4px solid #e53e3e;
+  color: #7a1b1b;
+}
+
+.status-warning {
+  background: #fff6ea;
+  color: #6b4b1f;
+  border-left: 4px solid #ed8936;
+}
+</style>
+{% endblock %}

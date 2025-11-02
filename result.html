@@ -1,0 +1,893 @@
+{% extends "base.html" %}
+{% block title %}Assessment Details - CHD App{% endblock %}
+{% block content %}
+<div class="result-container">
+  <!-- Loading State -->
+  <div id="loading-state" class="card loading-card">
+    <div class="loading-content">
+      <div class="loading-spinner"></div>
+      <h3>Loading Assessment Details</h3>
+      <p>Retrieving your CHD risk assessment...</p>
+    </div>
+  </div>
+
+  <!-- Main Result Content -->
+  <div id="result-content" style="display: none;">
+    <!-- Navigation Header -->
+    <div class="result-header card">
+      <div class="header-nav">
+        <a href="{{ url_for('dashboard_page') }}" class="nav-back">
+          <span class="nav-icon">← </span>
+          Back to Dashboard
+        </a>
+        <div class="header-actions">
+          <button onclick="window.print()" class="btn-secondary">
+            <span class="btn-icon">🖨️</span>
+            Print Report
+          </button>
+          <button onclick="shareResult()" class="btn-secondary">
+            <span class="btn-icon">📤</span>
+            Share
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Risk Assessment Summary -->
+    <div id="risk-summary-card" class="card risk-summary">
+      <!-- Dynamic content -->
+    </div>
+
+    <!-- Detailed Analysis -->
+    <div class="analysis-grid">
+      <!-- Risk Factors -->
+      <div class="card analysis-card">
+        <div class="card-header"><h3>📊 Risk Factor Analysis</h3></div>
+        <div id="risk-factors-content" class="card-content"></div>
+      </div>
+
+      <!-- Patient Data -->
+      <div class="card analysis-card">
+        <div class="card-header"><h3>📋 Input Parameters</h3></div>
+        <div id="patient-data-content" class="card-content"></div>
+      </div>
+    </div>
+
+    <!-- Recommendations -->
+    <div class="card recommendations-card">
+      <div class="card-header"><h3>💡 Medical Recommendations</h3></div>
+      <div id="recommendations-content" class="card-content"></div>
+    </div>
+
+    <!-- Trends -->
+    <div id="trends-card" class="card trends-card" style="display:none;">
+      <div class="card-header"><h3>📈 Risk Trend Analysis</h3></div>
+      <div id="trends-content" class="card-content"></div>
+    </div>
+
+    <!-- Metadata -->
+    <div class="card metadata-card">
+      <div class="card-header"><h3>📄 Assessment Information</h3></div>
+      <div id="metadata-content" class="card-content"></div>
+    </div>
+  </div>
+
+  <!-- Error State -->
+  <div id="error-state" class="card error-card" style="display:none;">
+    <div class="error-content">
+      <div class="error-icon">❌</div>
+      <h3>Assessment Not Found</h3>
+      <p id="error-message">The requested assessment could not be found or you don't have permission to view it.</p>
+      <div class="error-actions">
+        <a href="{{ url_for('dashboard_page') }}" class="btn-primary"><span class="btn-icon">🏠</span>Go to Dashboard</a>
+        <a href="{{ url_for('predict_page') }}" class="btn-secondary"><span class="btn-icon">➕</span>New Assessment</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.result-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.loading-card,
+.error-card {
+  text-align: center;
+  padding: 4rem 2rem;
+}
+
+.loading-content,
+.error-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(169, 62, 83, 0.1);
+  border-top: 4px solid #A93E53;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-content h3,
+.error-content h3 {
+  color: #6B052F;
+  margin: 0;
+}
+
+.loading-content p,
+.error-content p {
+  color: #A93E53;
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.error-icon {
+  font-size: 4rem;
+}
+
+.error-actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.result-header {
+  padding: 1.5rem;
+}
+
+.header-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.nav-back {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  color: #A93E53;
+  font-weight: 600;
+  font-size: 1.1rem;
+  transition: color 0.3s ease;
+}
+
+.nav-back:hover {
+  color: #6B052F;
+}
+
+.nav-icon {
+  font-size: 1.2rem;
+}
+
+.header-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.btn-primary,
+.btn-secondary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  font-size: 0.95rem;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #A93E53, #6B052F);
+  color: white;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(169, 62, 83, 0.3);
+}
+
+.btn-secondary {
+  background: rgba(169, 62, 83, 0.1);
+  color: #6B052F;
+  border: 1px solid rgba(169, 62, 83, 0.2);
+}
+
+.btn-secondary:hover {
+  background: rgba(169, 62, 83, 0.2);
+  transform: translateY(-1px);
+}
+
+.btn-icon {
+  font-size: 1rem;
+}
+
+.risk-summary {
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.risk-summary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #6B052F, #A93E53);
+}
+
+.risk-header {
+  margin-bottom: 2rem;
+}
+
+.risk-level {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.risk-icon {
+  font-size: 4rem;
+}
+
+.risk-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.risk-probability {
+  font-size: 1.5rem;
+  margin: 0.5rem 0;
+  font-weight: 600;
+}
+
+.risk-description {
+  font-size: 1.1rem;
+  color: #666;
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.5;
+}
+
+.analysis-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 2rem;
+}
+
+.analysis-card {
+  height: fit-content;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid rgba(169, 62, 83, 0.1);
+}
+
+.card-header h3 {
+  color: #6B052F;
+  margin: 0;
+  font-size: 1.3rem;
+}
+
+.card-content {
+  line-height: 1.6;
+}
+
+.parameter-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.parameter-item {
+  background: rgba(255, 255, 255, 0.7);
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(169, 62, 83, 0.1);
+}
+
+.parameter-label {
+  font-weight: 600;
+  color: #6B052F;
+  margin-bottom: 0.25rem;
+  font-size: 0.9rem;
+}
+
+.parameter-value {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #333;
+}
+
+.parameter-unit {
+  font-size: 0.9rem;
+  color: #666;
+  margin-left: 0.25rem;
+}
+
+.factor-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.factor-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 8px;
+  border-left: 4px solid transparent;
+}
+
+.factor-item.risk-high {
+  border-left-color: #e53e3e;
+  background: rgba(229, 62, 62, 0.05);
+}
+
+.factor-item.risk-moderate {
+  border-left-color: #ffc107;
+  background: rgba(255, 193, 7, 0.05);
+}
+
+.factor-item.risk-low {
+  border-left-color: #28a745;
+  background: rgba(40, 167, 69, 0.05);
+}
+
+.factor-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.factor-content {
+  flex: 1;
+}
+
+.factor-name {
+  font-weight: 600;
+  color: #6B052F;
+  margin-bottom: 0.25rem;
+}
+
+.factor-impact {
+  font-size: 0.9rem;
+  color: #666;
+  line-height: 1.4;
+}
+
+.recommendations-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.recommendation-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 12px;
+  border: 1px solid rgba(169, 62, 83, 0.1);
+}
+
+.recommendation-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.recommendation-content h4 {
+  color: #6B052F;
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+}
+
+.recommendation-content p {
+  color: #666;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.metadata-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.metadata-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.metadata-label {
+  font-weight: 600;
+  color: #A93E53;
+  font-size: 0.9rem;
+}
+
+.metadata-value {
+  color: #333;
+  font-size: 1.05rem;
+}
+
+/* Risk level specific colors */
+.risk-low .risk-title { color: #28a745; }
+.risk-moderate .risk-title { color: #ffc107; }
+.risk-high .risk-title { color: #e53e3e; }
+
+.risk-low .risk-probability { color: #28a745; }
+.risk-moderate .risk-probability { color: #e67e22; }
+.risk-high .risk-probability { color: #e53e3e; }
+
+/* Primary recommendation styling */
+.primary-recommendation {
+  background: rgba(169, 62, 83, 0.05);
+  padding: 1.5rem;
+  border-radius: 8px;
+  border-left: 4px solid #A93E53;
+  margin-bottom: 2rem;
+}
+
+.primary-recommendation h4 {
+  color: #6B052F;
+  margin: 0 0 0.5rem 0;
+}
+
+.primary-recommendation p {
+  color: #666;
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 1.5;
+}
+
+.assessment-date {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(169, 62, 83, 0.1);
+  color: #999;
+  text-align: center;
+}
+
+/* Trends styling */
+.trends-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.trend-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 8px;
+  border: 1px solid rgba(169, 62, 83, 0.1);
+  position: relative;
+}
+
+.trend-item.current-assessment {
+  background: rgba(169, 62, 83, 0.05);
+  border-color: #A93E53;
+}
+
+.trend-date {
+  font-weight: 600;
+  color: #6B052F;
+}
+
+.trend-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.trend-icon {
+  font-size: 1.2rem;
+}
+
+.trend-risk {
+  font-weight: 600;
+  padding: 0.25rem 0.75rem;
+  border-radius: 15px;
+  font-size: 0.85rem;
+}
+
+.trend-probability {
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.current-label {
+  position: absolute;
+  top: -8px;
+  right: 1rem;
+  background: #A93E53;
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* Print styles */
+@media print {
+  .header-actions,
+  .nav-back {
+    display: none;
+  }
+  
+  .card {
+    break-inside: avoid;
+    box-shadow: none;
+    border: 1px solid #ddd;
+  }
+  
+  .result-container {
+    gap: 1rem;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .analysis-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .header-nav {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .header-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .btn-primary,
+  .btn-secondary {
+    flex: 1;
+    justify-content: center;
+  }
+  
+  .risk-level {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .risk-title {
+    font-size: 2rem;
+  }
+  
+  .parameter-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .metadata-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .error-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .btn-primary,
+  .btn-secondary {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .result-container {
+    gap: 1rem;
+  }
+  
+  .card {
+    padding: 1.5rem;
+  }
+  
+  .risk-icon {
+    font-size: 3rem;
+  }
+  
+  .risk-title {
+    font-size: 1.8rem;
+  }
+  
+  .factor-item,
+  .recommendation-item {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+</style>
+
+<script>
+let currentAssessment = null;
+
+async function loadPrediction() {
+  try {
+    const path = window.location.pathname;
+    const predId = path.split('/').pop();
+    if (!predId || predId === 'result') throw new Error('No assessment ID provided');
+
+    const res = await fetch('/history', { credentials: 'same-origin' });
+    if (!res.ok) throw new Error('Failed to fetch assessment data');
+    const data = await res.json();
+
+    const prediction = data.predictions?.find(p => p.id == predId);
+    if (!prediction) throw new Error('Assessment not found or access denied');
+
+    currentAssessment = prediction;
+    renderAssessment(prediction);
+
+    if (data.predictions.length > 1) loadTrends(data.predictions, predId);
+  } catch (error) {
+    showError(error.message || 'Failed to load assessment');
+  }
+}
+
+function renderAssessment(prediction) {
+  const result = prediction.result_json || {};
+  const input = prediction.input_json || {};
+  document.getElementById('loading-state').style.display = 'none';
+  document.getElementById('result-content').style.display = 'block';
+
+  renderRiskSummary(result, prediction.created_at);
+  renderRiskFactors(input, result);
+  renderPatientData(input);
+  renderRecommendations(result);
+  renderMetadata(prediction);
+}
+
+function renderRiskSummary(result, createdAt) {
+  const riskCategory = result.risk_category || 'Unknown';
+  const probability = result.chd_risk_probability ? (result.chd_risk_probability * 100).toFixed(1) : 'N/A';
+  const description = result.risk_description || 'No description available';
+  const riskClass = riskCategory.toLowerCase().replace(' ', '-');
+  const riskIcon = getRiskIcon(riskClass);
+
+  document.getElementById('risk-summary-card').innerHTML = `
+    <div class="risk-header">
+      <div class="risk-level">
+        <span class="risk-icon">${riskIcon}</span>
+        <h1 class="risk-title risk-${riskClass}">${riskCategory} Risk</h1>
+      </div>
+      <div class="risk-probability">CHD Risk Probability: <strong>${probability}%</strong></div>
+      <p class="risk-description">${description}</p>
+    </div>
+    <div class="assessment-date">
+      <small>Assessment completed on ${formatDate(createdAt)} at ${formatTime(createdAt)}</small>
+    </div>
+  `;
+  document.getElementById('risk-summary-card').className = `card risk-summary risk-${riskClass}`;
+}
+
+function renderRiskFactors(input) {
+  const factors = analyzeRiskFactors(input);
+  let html = '<div class="factor-list">';
+  factors.forEach(factor => {
+    html += `
+      <div class="factor-item ${factor.level}">
+        <span class="factor-icon">${factor.icon}</span>
+        <div class="factor-content">
+          <div class="factor-name">${factor.name}</div>
+          <div class="factor-impact">${factor.description}</div>
+        </div>
+      </div>
+    `;
+  });
+  html += '</div>';
+  document.getElementById('risk-factors-content').innerHTML = html;
+}
+
+function renderPatientData(input) {
+  const parameters = [
+    { label: 'Age', value: input.age, unit: 'years' },
+    { label: 'Gender', value: input.male === 1 ? 'Male' : input.male === 0 ? 'Female' : 'N/A', unit: '' },
+    { label: 'Total Cholesterol', value: input.totChol, unit: 'mg/dL' },
+    { label: 'Systolic BP', value: input.sysBP, unit: 'mmHg' },
+    { label: 'Diastolic BP', value: input.diaBP, unit: 'mmHg' },
+    { label: 'BMI', value: input.BMI, unit: 'kg/m²' },
+    { label: 'Heart Rate', value: input.heartRate, unit: 'bpm' },
+    { label: 'Glucose', value: input.glucose, unit: 'mg/dL' },
+    { label: 'Cigarettes/Day', value: input.cigsPerDay, unit: 'cigs' },
+    { label: 'Education Level', value: getEducationLabel(input.education), unit: '' }
+  ];
+  let html = '<div class="parameter-grid">';
+  parameters.forEach(param => {
+    html += `
+      <div class="parameter-item">
+        <div class="parameter-label">${param.label}</div>
+        <div class="parameter-value">
+          ${param.value || 'N/A'} <span class="parameter-unit">${param.unit}</span>
+        </div>
+      </div>
+    `;
+  });
+  html += '</div>';
+  document.getElementById('patient-data-content').innerHTML = html;
+}
+
+function renderRecommendations(result) {
+  const recommendation = result.recommendation || 'No specific recommendations available';
+  const recommendations = generateDetailedRecommendations(currentAssessment.input_json, result);
+  let html = `
+    <div class="primary-recommendation">
+      <h4>Primary Recommendation</h4>
+      <p>${recommendation}</p>
+    </div>
+    <div class="recommendations-list">
+  `;
+  recommendations.forEach(rec => {
+    html += `
+      <div class="recommendation-item">
+        <span class="recommendation-icon">${rec.icon}</span>
+        <div class="recommendation-content">
+          <h4>${rec.title}</h4>
+          <p>${rec.description}</p>
+        </div>
+      </div>
+    `;
+  });
+  html += '</div>';
+  document.getElementById('recommendations-content').innerHTML = html;
+}
+
+function renderMetadata(prediction) {
+  const metadata = [
+    { label: 'Assessment ID', value: prediction.id },
+    { label: 'Date Created', value: formatDate(prediction.created_at) },
+    { label: 'Time Created', value: formatTime(prediction.created_at) },
+    { label: 'Model Version', value: 'CHD Risk Predictor v2.1' },
+    { label: 'Data Completeness', value: calculateCompleteness(prediction.input_json) }
+  ];
+  let html = '<div class="metadata-grid">';
+  metadata.forEach(item => {
+    html += `
+      <div class="metadata-item">
+        <div class="metadata-label">${item.label}</div>
+        <div class="metadata-value">${item.value}</div>
+      </div>
+    `;
+  });
+  html += '</div>';
+  document.getElementById('metadata-content').innerHTML = html;
+}
+
+/* ==== Helper Functions ==== */
+function analyzeRiskFactors(input) {
+  const factors = [];
+  if (input.age >= 65) factors.push({ name: 'Advanced Age', description: `At ${input.age} years, age is a significant risk factor.`, level: 'risk-high' ,icon: '👴'});
+  else if (input.age >= 50) factors.push({ name: 'Moderate Age Risk', description: `At ${input.age} years, age contributes moderately.`, level: 'risk-moderate', icon: '👨'});
+  else factors.push({ name: 'Age Advantage', description: `At ${input.age} years, age is not a major factor.`, level: 'risk-low', icon: '🧑' });
+
+  if (input.male === 1) factors.push({ name: 'Male Gender', description: 'Men generally have higher CHD risk.', level: 'risk-moderate', icon: '👨' });
+  if (input.cigsPerDay > 20) factors.push({ name: 'Heavy Smoking', description: `${input.cigsPerDay} cigs/day increases risk.`, level: 'risk-high', icon: '🚬' });
+  else if (input.cigsPerDay > 0) factors.push({ name: 'Smoker', description: `${input.cigsPerDay} cigs/day moderately increases risk.`, level: 'risk-moderate', icon: '🚬' });
+  else factors.push({ name: 'Non-Smoker', description: 'No smoking detected.', level: 'risk-low', icon: '✅' });
+
+  if (input.BMI >= 30) factors.push({ name: 'Obesity', description: `BMI of ${input.BMI} indicates obesity.`, level: 'risk-high', icon: '⚖️' });
+  if (input.sysBP >= 140) factors.push({ name: 'Hypertension', description: `Systolic BP ${input.sysBP} mmHg is high.`, level: 'risk-high', icon: '❤️' });
+  return factors;
+}
+
+function generateDetailedRecommendations(input, result) {
+  const recs = [];
+  if (input.cigsPerDay > 0) recs.push({ icon: '🚭', title: 'Quit Smoking', description: 'Stopping smoking reduces risk significantly.' });
+  if (input.BMI >= 25) recs.push({ icon: '🥗', title: 'Healthy Diet', description: 'Adopt a balanced diet to improve BMI.' });
+  if (input.sysBP >= 140) recs.push({ icon: '💊', title: 'Blood Pressure Management', description: 'Consider lifestyle changes and medication.' });
+  recs.push({ icon: '🏃', title: 'Regular Exercise', description: 'Aim for at least 150 min of activity weekly.' });
+  return recs;
+}
+
+function calculateCompleteness(input) {
+  const keys = Object.keys(input || {});
+  const filled = keys.filter(k => input[k] !== null && input[k] !== '').length;
+  return `${Math.round((filled / (keys.length || 1)) * 100)}%`;
+}
+
+function formatDate(dateStr) {
+  const d = new Date(dateStr);
+  return d.toLocaleDateString();
+}
+
+function formatTime(dateStr) {
+  const d = new Date(dateStr);
+  return d.toLocaleTimeString();
+}
+
+function getEducationLabel(code) {
+  const labels = { 1: 'Some High School', 2: 'High School Graduate', 3: 'Some College', 4: 'College Graduate' };
+  return labels[code] || 'N/A';
+}
+
+function getRiskIcon(level) {
+  if (level.includes('high')) return '⚠️';
+  if (level.includes('moderate')) return '⚡';
+  if (level.includes('low')) return '✅';
+  return '❓';
+}
+
+function showError(message) {
+  document.getElementById('loading-state').style.display = 'none';
+  document.getElementById('result-content').style.display = 'none';
+  document.getElementById('error-state').style.display = 'block';
+  document.getElementById('error-message').innerText = message;
+}
+
+function loadTrends(predictions, currentId) {
+  const container = document.getElementById('trends-content');
+  let html = '<div class="trends-list">';
+  predictions.forEach(p => {
+    const result = p.result_json || {};
+    const prob = result.chd_risk_probability ? (result.chd_risk_probability * 100).toFixed(1) : 'N/A';
+    const category = result.risk_category || 'Unknown';
+    const isCurrent = p.id == currentId;
+    html += `
+      <div class="trend-item ${isCurrent ? 'current-assessment' : ''}">
+        <div class="trend-date">${formatDate(p.created_at)}</div>
+        <div class="trend-indicator">
+          <span class="trend-risk">${category}</span>
+          <span class="trend-probability">${prob}%</span>
+        </div>
+        ${isCurrent ? '<span class="current-label">Current</span>' : ''}
+      </div>
+    `;
+  });
+  html += '</div>';
+  document.getElementById('trends-card').style.display = 'block';
+  container.innerHTML = html;
+}
+
+function shareResult() {
+  if (navigator.share && currentAssessment) {
+    navigator.share({
+      title: 'CHD Risk Assessment',
+      text: `My CHD risk is ${currentAssessment.result_json?.chd_risk_probability * 100 || 'N/A'}%.`,
+      url: window.location.href
+    });
+  } else {
+    alert('Sharing not supported on this device.');
+  }
+}
+
+window.onload = loadPrediction;
+</script>
+{% endblock %}

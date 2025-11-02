@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}CHD Prediction App{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>❤️</text></svg>">
+</head>
+<body>
+  <nav>
+    <div class="nav-container">
+      <div class="nav-brand">
+        <a href="{{ url_for('index_page') }}" class="brand-link">❤️ CHD Predictor</a>
+      </div>
+      <div class="nav-links">
+        <a href="{{ url_for('index_page') }}">Home</a>
+        <a href="{{ url_for('predict_page') }}">Predict</a>
+        <a href="{{ url_for('dashboard_page') }}">Dashboard</a>
+        <a href="{{ url_for('login_page') }}">Login</a>
+        <a href="{{ url_for('signup_page') }}">Signup</a>
+      </div>
+    </div>
+  </nav>
+
+  <main id="main-content">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer>
+    <div class="footer-content">
+      <p>&copy; 2025 CHD Prediction App. For medical guidance only.</p>
+      <p><small>Always consult with healthcare professionals for medical decisions.</small></p>
+    </div>
+  </footer>
+
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

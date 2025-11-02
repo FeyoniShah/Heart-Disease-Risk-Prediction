@@ -1,0 +1,461 @@
+{% extends "base.html" %}
+{% block title %}Login - CHD App{% endblock %}
+{% block content %}
+<div class="auth-container">
+  <div class="auth-card card">
+    <div class="auth-header">
+      <div class="auth-icon">🔐</div>
+      <h2>Welcome Back</h2>
+      <p>Sign in to access your CHD risk assessments</p>
+    </div>
+
+    <form id="login-form" class="auth-form">
+      <div class="form-group">
+        <label for="login-email">Email Address</label>
+        <div class="input-wrapper">
+          <span class="input-icon">✉️</span>
+          <input type="email" name="email" id="login-email" required placeholder="Enter your email">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="login-password">Password</label>
+        <div class="input-wrapper">
+          <span class="input-icon">🔒</span>
+          <input type="password" name="password" id="login-password" required placeholder="Enter your password">
+          <button type="button" class="password-toggle" onclick="togglePassword('login-password')">
+            <span class="toggle-icon">👁️</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn-primary">
+          <span class="btn-icon">🚀</span>
+          Sign In
+        </button>
+      </div>
+    </form>
+
+    <div id="login-message" class="message"></div>
+
+    <div class="auth-footer">
+      <p>Don't have an account? <a href="{{ url_for('signup_page') }}">Sign up here</a></p>
+      <div class="auth-links">
+        <a href="#" class="forgot-link">Forgot Password?</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="auth-features">
+    <div class="feature-item">
+      <div class="feature-icon">📊</div>
+      <h3>Track Your Health</h3>
+      <p>Monitor CHD risk assessments over time</p>
+    </div>
+    <div class="feature-item">
+      <div class="feature-icon">🔒</div>
+      <h3>Secure & Private</h3>
+      <p>Your medical data is encrypted and protected</p>
+    </div>
+    <div class="feature-item">
+      <div class="feature-icon">📱</div>
+      <h3>Easy Access</h3>
+      <p>Access your reports from any device</p>
+    </div>
+  </div>
+</div>
+
+<style>
+.auth-container {
+  display: flex;
+  min-height: calc(100vh - 200px);
+  gap: 3rem;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 0;
+}
+
+.auth-card {
+  flex: 0 0 400px;
+  max-width: 400px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(169, 62, 83, 0.1);
+  box-shadow: 0 20px 60px rgba(107, 5, 47, 0.1);
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.auth-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.auth-header h2 {
+  color: #6B052F;
+  margin-bottom: 0.5rem;
+  font-size: 1.8rem;
+}
+
+.auth-header p {
+  color: #A93E53;
+  margin: 0;
+  font-size: 1rem;
+}
+
+.auth-form {
+  background: transparent;
+  padding: 0;
+  box-shadow: none;
+  border: none;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #6B052F;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon {
+  position: absolute;
+  left: 12px;
+  font-size: 1.1rem;
+  z-index: 2;
+}
+
+.input-wrapper input {
+  padding-left: 3rem;
+  padding-right: 3rem;
+  width: 100%;
+  height: 48px;
+  border: 2px solid rgba(169, 62, 83, 0.1);
+  border-radius: 8px;
+  font-size: 1rem;
+  background: #fff;
+  transition: all 0.3s ease;
+}
+
+.input-wrapper input:focus {
+  border-color: rgba(169, 62, 83, 0.6);
+  box-shadow: 0 0 0 3px rgba(255, 220, 209, 0.3);
+  outline: none;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background 0.3s ease;
+  z-index: 2;
+}
+
+.password-toggle:hover {
+  background: rgba(169, 62, 83, 0.1);
+}
+
+.toggle-icon {
+  font-size: 1.1rem;
+}
+
+.form-actions {
+  margin: 2rem 0;
+}
+
+.btn-primary {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #A93E53, #6B052F);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  height: 48px;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(169, 62, 83, 0.3);
+}
+
+.btn-primary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-icon {
+  font-size: 1.1rem;
+}
+
+.message {
+  margin: 1rem 0;
+  padding: 1rem;
+  border-radius: 8px;
+  font-weight: 500;
+  text-align: center;
+  display: none;
+}
+
+.message:not(:empty) {
+  display: block;
+}
+
+.message.success {
+  background: #eaf7ef;
+  color: #185033;
+  border: 1px solid #48bb78;
+}
+
+.message.error {
+  background: #fff0f0;
+  color: #7a1b1b;
+  border: 1px solid #e53e3e;
+}
+
+.auth-footer {
+  text-align: center;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(169, 62, 83, 0.1);
+}
+
+.auth-footer p {
+  margin-bottom: 1rem;
+  color: #666;
+}
+
+.auth-footer a {
+  color: #A93E53;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.auth-footer a:hover {
+  color: #6B052F;
+  text-decoration: underline;
+}
+
+.auth-links {
+  margin-top: 1rem;
+}
+
+.forgot-link {
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+.auth-features {
+  flex: 1;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 12px;
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(169, 62, 83, 0.05);
+  transition: transform 0.3s ease;
+}
+
+.feature-item:hover {
+  transform: translateX(5px);
+}
+
+.feature-item .feature-icon {
+  font-size: 2.5rem;
+  flex-shrink: 0;
+}
+
+.feature-item h3 {
+  color: #6B052F;
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+}
+
+.feature-item p {
+  color: #666;
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.loading {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .auth-container {
+    flex-direction: column;
+    gap: 2rem;
+  }
+  
+  .auth-features {
+    max-width: 600px;
+  }
+  
+  .feature-item {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .feature-item:hover {
+    transform: translateY(-5px);
+  }
+}
+
+@media (max-width: 768px) {
+  .auth-container {
+    padding: 1rem;
+  }
+  
+  .auth-card {
+    flex: none;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+  }
+  
+  .auth-features {
+    width: 100%;
+  }
+}
+</style>
+
+<script>
+// Enhanced login form functionality
+function togglePassword(inputId) {
+  const input = document.getElementById(inputId);
+  const toggle = input.nextElementSibling.querySelector('.toggle-icon');
+  
+  if (input.type === 'password') {
+    input.type = 'text';
+    toggle.textContent = '🙈';
+  } else {
+    input.type = 'password';
+    toggle.textContent = '👁️';
+  }
+}
+
+function showMessage(text, type = 'info') {
+  const messageEl = document.getElementById('login-message');
+  messageEl.textContent = text;
+  messageEl.className = `message ${type}`;
+}
+
+function hideMessage() {
+  const messageEl = document.getElementById('login-message');
+  messageEl.textContent = '';
+  messageEl.className = 'message';
+}
+
+document.getElementById('login-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const form = e.target;
+  const submitBtn = form.querySelector('button[type="submit"]');
+  const originalContent = submitBtn.innerHTML;
+  
+  // Show loading state
+  submitBtn.innerHTML = '<span class="loading"></span> Signing in...';
+  submitBtn.disabled = true;
+  hideMessage();
+  
+  const payload = {
+    email: form.email.value.trim(),
+    password: form.password.value
+  };
+  
+  try {
+    const res = await fetch('/login', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload),
+      credentials: 'same-origin'
+    });
+    
+    const data = await res.json();
+    
+    if (res.ok) {
+      showMessage('Login successful! Redirecting...', 'success');
+      setTimeout(() => {
+        window.location.href = '/predict';
+      }, 1000);
+    } else {
+      showMessage(data.error || 'Login failed. Please check your credentials.', 'error');
+    }
+  } catch (error) {
+    showMessage('Network error. Please try again.', 'error');
+  } finally {
+    // Restore button state
+    submitBtn.innerHTML = originalContent;
+    submitBtn.disabled = false;
+  }
+});
+
+// Add form validation feedback
+const inputs = document.querySelectorAll('input[required]');
+inputs.forEach(input => {
+  input.addEventListener('blur', function() {
+    if (this.value.trim() === '') {
+      this.style.borderColor = 'rgba(229, 62, 62, 0.6)';
+    } else if (this.type === 'email' && !this.validity.valid) {
+      this.style.borderColor = 'rgba(229, 62, 62, 0.6)';
+    } else {
+      this.style.borderColor = 'rgba(169, 62, 83, 0.1)';
+    }
+  });
+  
+  input.addEventListener('input', function() {
+    if (this.style.borderColor === 'rgba(229, 62, 62, 0.6)' && this.value.trim() !== '') {
+      this.style.borderColor = 'rgba(169, 62, 83, 0.1)';
+    }
+  });
+});
+</script>
+{% endblock %}
